@@ -1,0 +1,36 @@
+---
+title: "Asignment2B"
+author: "Cecilia De La Fuente Chavez"
+format: html
+execute:
+  echo: true
+editor: visual
+---
+
+## Approach Deliverable
+
+### Overview
+
+Classification models are new to me and I only learned the basics in class yesterday, I will approach this assignment by first examining the values and compare the resulting confusion matrices, and calculate the requested metrics. One challenge I anticipate is making sure I correctly handle these calculations.
+
+## Code Base Deliverable
+
+### Load library
+
+```{r}
+library(tidyverse)
+```
+
+### Read data from GitHub
+
+```{r}
+url <- "https://raw.githubusercontent.com/acatlin/data/refs/heads/master/penguin_predictions.csv"
+
+df <- read_csv(
+  file = url,
+  show_col_types = FALSE,
+  progress = FALSE, 
+  skip = 10
+)
+glimpse(df)
+```
