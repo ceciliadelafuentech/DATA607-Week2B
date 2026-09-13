@@ -29,8 +29,40 @@ url <- "https://raw.githubusercontent.com/acatlin/data/refs/heads/master/penguin
 df <- read_csv(
   file = url,
   show_col_types = FALSE,
-  progress = FALSE, 
-  skip = 10
+  progress = FALSE
 )
-glimpse(df)
+
+head(df)
 ```
+
+### Step 1
+
+Get count of penguins by actual sex, total count, and percent of each sex
+
+```{r}
+penguin_count_sex <- df |>
+  count(sex) |>
+  mutate(total_rows = sum(n),
+         sex_percent = n/total_rows,
+         )
+
+print(penguin_count_sex)
+```
+
+Plot the distribution
+
+```{r}
+ggplot(penguin_count_sex, aes(x = sex, y = n, fill = sex)) +
+  geom_col() +
+  labs(
+    title = "Penguin Sex Distribution"
+  ) +
+  geom_text(
+    aes(label = paste0(round(sex_percent * 100, 1), "%")),
+    vjust = -0.3
+  )
+```
+
+### Step 2
+
+Get c
