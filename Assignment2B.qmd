@@ -35,24 +35,22 @@ df <- read_csv(
 head(df)
 ```
 
-### Step 1
-
 Get count of penguins by actual sex, total count, and percent of each sex
 
 ```{r}
-penguin_count_sex <- df |>
+penguin_dist <- df |>
   count(sex) |>
   mutate(total_rows = sum(n),
          sex_percent = n/total_rows,
          )
 
-print(penguin_count_sex)
+print(penguin_dist)
 ```
 
 Plot the distribution
 
 ```{r}
-ggplot(penguin_count_sex, aes(x = sex, y = n, fill = sex)) +
+ggplot(penguin_dist, aes(x = sex, y = n, fill = sex)) +
   geom_col() +
   labs(
     title = "Penguin Sex Distribution"
@@ -63,6 +61,115 @@ ggplot(penguin_count_sex, aes(x = sex, y = n, fill = sex)) +
   )
 ```
 
-### Step 2
+Null metrics calculations
 
-Get c
+```{r}
+null_metrics <- penguin_dist |>
+  summarize(
+    accuracy = max(sex_percent),
+    error_rate = 1 - max(sex_percent)
+  )
+
+print(null_metrics)
+```
+
+Recompute predicted class
+
+```{r}
+prediction_results <- df |>
+  mutate(
+    pred_02 = ifelse(.pred_female > 0.2, 1, 0),
+    pred_05 = ifelse(.pred_female > 0.5, 1, 0),
+    pred_08 = ifelse(.pred_female > 0.8, 1, 0)
+  )
+
+print(prediction_results)
+```
+
+Metrics for .5
+
+```{r}
+prediction_results <- prediction_results |>
+  mutate(
+    TP = sex == "female" & pred_05 == 1,
+    FP = sex == "male" & pred_05 == 1,
+    TN = sex == "male" & pred_05 == 0,
+    FN = sex == "female" & pred_05 == 0
+  )
+
+metrics_05 <- prediction_results |>
+  summarize(
+    TP = sum(TP),
+    FP = sum(FP),
+    TN = sum(TN),
+    FN = sum(FN)
+  ) |>
+  mutate(
+    accuracy = (TP + TN) / (TP + FP + TN + FN),
+    precision = TP / (TP + FP),
+    recall = TP / (TP + FN),
+    f1 = 2 * precision * recall / (precision + recall)
+  )
+
+print(metrics_05)
+```
+
+Metrics for .2
+
+```{r}
+prediction_results <- prediction_results |>
+  mutate(
+    TP = sex == "female" & pred_02 == 1,
+    FP = sex == "male" & pred_02 == 1,
+    TN = sex == "male" & pred_02 == 0,
+    FN = sex == "female" & pred_02 == 0
+  )
+
+metrics_02 <- prediction_results |>
+  summarize(
+    TP = sum(TP),
+    FP = sum(FP),
+    TN = sum(TN),
+    FN = sum(FN)
+  ) |>
+  mutate(
+    accuracy = (TP + TN) / (TP + FP + TN + FN),
+    precision = TP / (TP + FP),
+    recall = TP / (TP + FN),
+    f1 = 2 * precision * recall / (precision + recall)
+  )
+
+print(metrics_02)
+```
+
+Metrics for .8
+
+```{r}
+prediction_results <- prediction_results |>
+  mutate(
+    TP = sex == "female" & pred_08 == 1,
+    FP = sex == "male" & pred_08 == 1,
+    TN = sex == "male" & pred_08 == 0,
+    FN = sex == "female" & pred_08 == 0
+  )
+
+metrics_08 <- prediction_results |>
+  summarize(
+    TP = sum(TP),
+    FP = sum(FP),
+    TN = sum(TN),
+    FN = sum(FN)
+  ) |>
+  mutate(
+    accuracy = (TP + TN) / (TP + FP + TN + FN),
+    precision = TP / (TP + FP),
+    recall = TP / (TP + FN),
+    f1 = 2 * precision * recall / (precision + recall)
+  )
+
+print(metrics_08)
+```
+
+## Conclusion
+
+The different probability thresholds affected the results. At 0.2 , the model had the highest recall (94.9%), correctly identifying the largest proportion of actual females, but it also had more false positives and lower precision (86.0%). At 0.5, precision and recall were both 92.3%. At 0.8, the model had the highest accuracy (94.6%), precision (94.7%), and F1 score (93.5%). Overall, the 0.8 threshold provided the best overall performance.
